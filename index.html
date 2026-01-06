@@ -1,45 +1,249 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BA & ITI Mock Test | Rohit Yadav</title>
+    <style>
+        :root {
+            --primary: #6e8efb;
+            --secondary: #a777e3;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0; padding: 20px;
+        }
+
+        .quiz-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        .btn-stylish {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; color: white; padding: 15px; margin: 8px 0;
+            width: 100%; border-radius: 12px; font-size: 16px;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+
+        .patti {
+            padding: 15px; border-radius: 10px; margin: 15px 0;
+            font-weight: bold; display: none; color: white;
+        }
+        .green-patti { background: var(--success); display: block; border: 2px solid #27ae60; }
+        .red-patti { background: var(--danger); display: block; border: 2px solid #c0392b; }
+
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+        .nav-btn { background: var(--dark); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; flex: 1; }
+
+        .result-screen { font-size: 22px; font-weight: bold; padding: 20px; }
+        .hidden { display: none; }
+        footer { margin-top: auto; padding: 20px; font-weight: bold; color: #444; }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-card">
+        <h1 id="main-title">Online Mock Test</h1>
+        
+        <div id="menu">
+            <p>Subject Select Karein (Total 4 Subjects):</p>
+            <button class="btn-stylish" onclick="startQuiz('hindi')">BA 4th Sem - Hindi</button>
+            <button class="btn-stylish" onclick="startQuiz('english')">BA 4th Sem - English</button>
+            <button class="btn-stylish" onclick="startQuiz('sociology')">BA 4th Sem - Sociology</button>
+            <button class="btn-stylish" style="background: #34495e;" onclick="startQuiz('fitter')">ITI - Fitter Trade</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <div style="display:flex; justify-content: space-between; color: var(--primary); font-weight:bold; margin-bottom:10px;">
+                <span id="subject-label"></span>
+                <span id="q-counter"></span>
+            </div>
+            <h3 id="question-text"></h3>
+            <div id="options-box"></div>
+            
+            <div id="patti-box" class="patti"></div>
+            <p id="instant-feedback" style="font-weight:bold; color: #555;"></p>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="prevQuestion()">Previous</button>
+                <button class="nav-btn" onclick="nextQuestion()">Next</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <div class="result-screen" id="final-message"></div>
+            <p id="score-text"></p>
+            <button class="btn-stylish" onclick="location.reload()">Main Menu / Re-test</button>
+        </div>
+    </div>
+
+    <footer>Developed By "Rohit Yadav"</footer>
+
+    <script>
+        let currentSubject = "";
+        let currentIndex = 0;
+        let score = 0;
+        let answeredQuestions = new Set();
+
         const quizData = {
             hindi: [
                 { q: "अनुवाद की प्रक्रिया में 'Source Language' को क्या कहते हैं?", options: ["लक्ष्य भाषा", "स्रोत भाषा", "मातृ भाषा", "विदेशी भाषा"], correct: 1, feedback: "स्रोत भाषा (Source Language) वह है जिससे अनुवाद किया जाता है।" },
-                { q: "अधिसूचना (Notification) कहाँ प्रकाशित होती है?", options: ["समाचार पत्र में", "सरकारी गजट में", "दीवार पर", "मैगजीन में"], correct: 1, feedback: "अधिसूचना हमेशा सरकारी गजट में प्रकाशित होती है।" },
-                // ... Baki Hindi questions yahan rahenge
+                { q: "अधिसूचना (Notification) कहाँ प्रकाशित होती है?", options: ["समाचार पत्र में", "सरकारी गजट में", "दीवार पर", "मैगजीन में"], correct: 1, feedback: "अधिसूचना हमेशा सरकारी गजट में प्रकाशित होती है।" }
+                // Yahan aap aur Hindi questions add kar sakte hain...
             ],
             english: [
-                { q: "Who is known as the 'Father of Indian Renaissance'?", options: ["Raja Ram Mohan Roy", "Rabindranath Tagore", "Mahatma Gandhi", "Vivekananda"], correct: 0, feedback: "Raja Ram Mohan Roy is credited for the social-religious reforms in India." },
-                { q: "The famous novel 'Godan' was originally written in which language?", options: ["Urdu", "Hindi", "Bengali", "Punjabi"], correct: 1, feedback: "Godan is a famous Hindi novel by Munshi Premchand." },
-                { q: "Who wrote the short story 'Toba Tek Singh'?", options: ["Premchand", "Saadat Hasan Manto", "Khushwant Singh", "Amrita Pritam"], correct: 1, feedback: "Manto is famous for his stories based on the Partition of India." },
-                { q: "'Geetanjali' was originally written in which language?", options: ["English", "Bengali", "Hindi", "Sanskrit"], correct: 1, feedback: "Rabindranath Tagore originally wrote Geetanjali in Bengali." },
-                { q: "Who is the author of 'Untouchable'?", options: ["R.K. Narayan", "Mulk Raj Anand", "Raja Rao", "Anita Desai"], correct: 1, feedback: "Mulk Raj Anand's 'Untouchable' is a landmark in Indian English literature." },
-                { q: "The term 'Translation' is derived from which Latin word?", options: ["Translatus", "Translatio", "Transfer", "Transpose"], correct: 1, feedback: "'Translatio' means to carry across." },
+                { q: "Who is known as the 'Father of Indian Renaissance'?", options: ["Raja Ram Mohan Roy", "Rabindranath Tagore", "Mahatma Gandhi", "Vivekananda"], correct: 0, feedback: "Raja Ram Mohan Roy started the social-religious reforms." },
+                { q: "The famous novel 'Godan' was originally written in which language?", options: ["Urdu", "Hindi", "Bengali", "Punjabi"], correct: 1, feedback: "Godan is a famous Hindi novel by Premchand." },
+                { q: "Who wrote the short story 'Toba Tek Singh'?", options: ["Premchand", "Saadat Hasan Manto", "Khushwant Singh", "Amrita Pritam"], correct: 1, feedback: "Manto wrote this about the tragedy of Partition." },
+                { q: "'Geetanjali' was originally written in which language?", options: ["English", "Bengali", "Hindi", "Sanskrit"], correct: 1, feedback: "Tagore wrote it in Bengali originally." },
+                { q: "Who is the author of 'Untouchable'?", options: ["R.K. Narayan", "Mulk Raj Anand", "Raja Rao", "Anita Desai"], correct: 1, feedback: "Mulk Raj Anand wrote this novel in 1935." },
+                { q: "The term 'Translation' is derived from which Latin word?", options: ["Translatus", "Translatio", "Transfer", "Transpose"], correct: 1, feedback: "'Translatio' means carrying across." },
                 { q: "Who translated 'The Bhagavad Gita' into English for the first time?", options: ["Max Muller", "Charles Wilkins", "William Jones", "James Princep"], correct: 1, feedback: "Charles Wilkins translated it in 1785." },
-                { q: "'Kanyadaan' is a famous play written by:", options: ["Vijay Tendulkar", "Girish Karnad", "Mahesh Dattani", "Badal Sircar"], correct: 0, feedback: "Vijay Tendulkar is a famous Marathi playwright." },
-                { q: "In translation, the original text is called:", options: ["Target Text", "Source Text", "Final Text", "Base Text"], correct: 1, feedback: "The text to be translated is the Source Text (ST)." },
-                { q: "Amrita Pritam was a prominent writer of which language?", options: ["Punjabi", "Hindi", "Gujarati", "Dogri"], correct: 0, feedback: "She was the first woman to win the Sahitya Akademi Award for Punjabi." },
-                { q: "Who wrote 'Joothan', a famous Dalit autobiography?", options: ["B.R. Ambedkar", "Omprakash Valmiki", "Surajpal Chauhan", "Mohandas Nemishray"], correct: 1, feedback: "Joothan is a powerful representation of Dalit life." },
-                { q: "'Hayavadana' is a play by:", options: ["Girish Karnad", "Vijay Tendulkar", "Mohan Rakesh", "Habib Tanvir"], correct: 0, feedback: "Girish Karnad is famous for using myths and history in plays." },
-                { q: "Who wrote the story 'The Shroud' (Kafan)?", options: ["Yashpal", "Premchand", "Bhisham Sahni", "Nirmal Verma"], correct: 1, feedback: "Kafan is one of Premchand's most famous and dark stories." },
-                { q: "What is 'Transcreation'?", options: ["Literal translation", "Creative translation", "Machine translation", "Word-to-word translation"], correct: 1, feedback: "Transcreation is adapting a message for a different culture while maintaining its tone." },
-                { q: "Rabindranath Tagore won the Nobel Prize for Literature in which year?", options: ["1910", "1913", "1915", "1920"], correct: 1, feedback: "He was the first non-European to win the Nobel Prize for Literature." },
-                { q: "Who wrote 'Samskara', a classic of modern Kannada literature?", options: ["U.R. Ananthamurthy", "Girish Karnad", "A.K. Ramanujan", "Raja Rao"], correct: 0, feedback: "Samskara explores the decaying brahminical traditions." },
-                { q: "The translated version of a text is known as:", options: ["Source Language", "Target Language", "Meta Language", "Native Language"], correct: 1, feedback: "The language into which a text is translated is the Target Language." },
-                { q: "Which of these is a 'Domesticating' strategy in translation?", options: ["Keeping foreign words", "Adapting to local culture", "Literal translation", "Complex decoding"], correct: 1, feedback: "Domestication makes the text familiar to the target audience." },
-                { q: "'Tamas' is a novel based on partition written by:", options: ["Khushwant Singh", "Bhisham Sahni", "Manto", "Kamleshwar"], correct: 1, feedback: "Tamas won the Sahitya Akademi Award in 1975." },
-                { q: "Who coined the term 'Cultural Turn' in translation studies?", options: ["Susan Bassnett", "Eugene Nida", "Roman Jakobson", "Peter Newmark"], correct: 0, feedback: "Bassnett and Lefevere introduced this in the 1990s." },
-                { q: "Who is the main character in Premchand’s 'Godan'?", options: ["Hori", "Gobar", "Madhav", "Ghisu"], correct: 0, feedback: "Hori represents the typical Indian peasant's struggle." },
-                { q: "'Ghashiram Kotwal' is a political satire by:", options: ["Vijay Tendulkar", "Girish Karnad", "Badal Sircar", "Satish Alekar"], correct: 0, feedback: "It is one of the most performed Marathi plays." },
-                { q: "Which Indian poet is known as the 'Nightingale of India'?", options: ["Sarojini Naidu", "Kamala Das", "Toru Dutt", "Mahadevi Verma"], correct: 0, feedback: "Sarojini Naidu was a prominent poet and freedom fighter." },
-                { q: "The autobiography of Mahatma Gandhi was originally written in:", options: ["English", "Hindi", "Gujarati", "Marathi"], correct: 2, feedback: "'The Story of My Experiments with Truth' was first in Gujarati." },
-                { q: "Mahasweta Devi is known for her writings on:", options: ["Urban life", "Tribal life", "Royal families", "Foreign lands"], correct: 1, feedback: "She worked extensively for tribal rights in Bengal." },
-                { q: "'Lajja' is a famous novel by:", options: ["Taslima Nasrin", "Arundhati Roy", "Jhumpa Lahiri", "Anita Desai"], correct: 0, feedback: "Lajja explores the religious persecution in Bangladesh." },
-                { q: "Formal Equivalence in translation was proposed by:", options: ["Eugene Nida", "J.C. Catford", "Mona Baker", "Peter Newmark"], correct: 0, feedback: "Nida focused on the response of the reader." },
-                { q: "Who wrote 'Train to Pakistan'?", options: ["Khushwant Singh", "Vikram Seth", "Salman Rushdie", "Amitav Ghosh"], correct: 0, feedback: "It is a famous novel about the 1947 Partition." },
+                { q: "'Kanyadaan' is a famous play written by:", options: ["Vijay Tendulkar", "Girish Karnad", "Mahesh Dattani", "Badal Sircar"], correct: 0, feedback: "Vijay Tendulkar is a great Marathi playwright." },
+                { q: "In translation, the original text is called:", options: ["Target Text", "Source Text", "Final Text", "Base Text"], correct: 1, feedback: "Source Text is the original content." },
+                { q: "Amrita Pritam was a prominent writer of which language?", options: ["Punjabi", "Hindi", "Gujarati", "Dogri"], correct: 0, feedback: "She was a famous Punjabi poetess." },
+                { q: "Who wrote 'Joothan', a famous Dalit autobiography?", options: ["B.R. Ambedkar", "Omprakash Valmiki", "Surajpal Chauhan", "Mohandas Nemishray"], correct: 1, feedback: "It is a landmark in Dalit literature." },
+                { q: "'Hayavadana' is a play by:", options: ["Girish Karnad", "Vijay Tendulkar", "Mohan Rakesh", "Habib Tanvir"], correct: 0, feedback: "Girish Karnad is the author." },
+                { q: "Who wrote the story 'The Shroud' (Kafan)?", options: ["Yashpal", "Premchand", "Bhisham Sahni", "Nirmal Verma"], correct: 1, feedback: "Kafan is a famous story by Premchand." },
+                { q: "What is 'Transcreation'?", options: ["Literal translation", "Creative translation", "Machine translation", "Word-to-word translation"], correct: 1, feedback: "It involves creative adaptation." },
+                { q: "Rabindranath Tagore won the Nobel Prize for Literature in which year?", options: ["1910", "1913", "1915", "1920"], correct: 1, feedback: "He won it in 1913 for Geetanjali." },
+                { q: "Who wrote 'Samskara', a classic of modern Kannada literature?", options: ["U.R. Ananthamurthy", "Girish Karnad", "A.K. Ramanujan", "Raja Rao"], correct: 0, feedback: "U.R. Ananthamurthy wrote this classic." },
+                { q: "The translated version of a text is known as:", options: ["Source Language", "Target Language", "Meta Language", "Native Language"], correct: 1, feedback: "It is called the Target Language text." },
+                { q: "Which of these is a 'Domesticating' strategy in translation?", options: ["Keeping foreign words", "Adapting to local culture", "Literal translation", "Complex decoding"], correct: 1, feedback: "Domesticating brings the text closer to the target culture." },
+                { q: "'Tamas' is a novel based on partition written by:", options: ["Khushwant Singh", "Bhisham Sahni", "Manto", "Kamleshwar"], correct: 1, feedback: "Bhisham Sahni wrote Tamas." },
+                { q: "Who coined the term 'Cultural Turn' in translation studies?", options: ["Susan Bassnett", "Eugene Nida", "Roman Jakobson", "Peter Newmark"], correct: 0, feedback: "Susan Bassnett is associated with this term." },
+                { q: "Who is the main character in Premchand’s 'Godan'?", options: ["Hori", "Gobar", "Madhav", "Ghisu"], correct: 0, feedback: "Hori is the central character." },
+                { q: "'Ghashiram Kotwal' is a political satire by:", options: ["Vijay Tendulkar", "Girish Karnad", "Badal Sircar", "Satish Alekar"], correct: 0, feedback: "Vijay Tendulkar wrote this satire." },
+                { q: "Which Indian poet is known as the 'Nightingale of India'?", options: ["Sarojini Naidu", "Kamala Das", "Toru Dutt", "Mahadevi Verma"], correct: 0, feedback: "Sarojini Naidu is known by this title." },
+                { q: "The autobiography of Mahatma Gandhi was originally written in:", options: ["English", "Hindi", "Gujarati", "Marathi"], correct: 2, feedback: "It was originally written in Gujarati." },
+                { q: "Mahasweta Devi is known for her writings on:", options: ["Urban life", "Tribal life", "Royal families", "Foreign lands"], correct: 1, feedback: "She wrote extensively about tribal struggles." },
+                { q: "'Lajja' is a famous novel by:", options: ["Taslima Nasrin", "Arundhati Roy", "Jhumpa Lahiri", "Anita Desai"], correct: 0, feedback: "Taslima Nasrin is the author." },
+                { q: "Formal Equivalence in translation was proposed by:", options: ["Eugene Nida", "J.C. Catford", "Mona Baker", "Peter Newmark"], correct: 0, feedback: "Eugene Nida proposed this concept." },
+                { q: "Who wrote 'Train to Pakistan'?", options: ["Khushwant Singh", "Vikram Seth", "Salman Rushdie", "Amitav Ghosh"], correct: 0, feedback: "Khushwant Singh wrote this partition novel." },
                 { q: "Which of these is NOT an Indian English writer?", options: ["R.K. Narayan", "Raja Rao", "T.S. Eliot", "Mulk Raj Anand"], correct: 2, feedback: "T.S. Eliot was an American-British poet." },
-                { q: "What is the theme of 'Toba Tek Singh'?", options: ["Marriage", "Partition", "Education", "Poverty"], correct: 1, feedback: "It shows the absurdity of drawing borders between people." }
+                { q: "What is the theme of 'Toba Tek Singh'?", options: ["Marriage", "Partition", "Education", "Poverty"], correct: 1, feedback: "Partition is the main theme." }
             ],
             sociology: [
-                { q: "समाजशास्त्र का जनक किसे माना जाता है?", options: ["अगस्त कॉम्टे", "कार्ल मार्क्स", "मैक्स वेबर", "अरस्तू"], correct: 0, feedback: "Auguste Comte ne 1838 mein Sociology shabd ka prayog kiya." }
+                { q: "समाजशास्त्र का जनक किसे कहा जाता है?", options: ["अगस्त कॉम्टे", "कार्ल मार्क्स", "मैक्स वेबर", "अरस्तू"], correct: 0, feedback: "अगस्त कॉम्टे ने 1838 में समाजशास्त्र नाम दिया।" }
             ],
             fitter: [
-                { q: "बेंच वाइस की बॉडी किस धातु की बनी होती है?", options: ["माइल्ड स्टील", "कास्ट आयरन", "एल्युमिनियम", "कॉपर"], correct: 1, feedback: "कास्ट आयरन झटकों को सहन कर सकता है।" }
+                { q: "बेंच वाइस की बॉडी किस धातु की बनी होती है?", options: ["माइल्ड स्टील", "कास्ट आयरन", "एल्युमिनियम", "कॉपर"], correct: 1, feedback: "कास्ट आयरन से बॉडी बनती है।" }
             ]
         };
+
+        function startQuiz(sub) {
+            currentSubject = sub;
+            currentIndex = 0;
+            score = 0;
+            answeredQuestions.clear();
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const data = quizData[currentSubject][currentIndex];
+            const totalQ = quizData[currentSubject].length > 20 ? 20 : quizData[currentSubject].length;
+            
+            document.getElementById('subject-label').innerText = currentSubject.toUpperCase();
+            document.getElementById('q-counter').innerText = `Q: ${currentIndex + 1}/${totalQ}`;
+            document.getElementById('question-text').innerText = data.q;
+            document.getElementById('patti-box').className = "patti";
+            document.getElementById('instant-feedback').innerText = "";
+
+            const optionsBox = document.getElementById('options-box');
+            optionsBox.innerHTML = '';
+            
+            data.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-stylish';
+                btn.style.background = 'white'; btn.style.color = '#333'; btn.style.border = '1px solid #ddd';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, data.correct, data.feedback, btn);
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct, feedback, btn) {
+            if (answeredQuestions.has(currentIndex)) return;
+
+            const patti = document.getElementById('patti-box');
+            const feedbackText = document.getElementById('instant-feedback');
+            
+            if (selected === correct) {
+                btn.classList.add('green-patti');
+                patti.innerText = "सहीं जवाब!";
+                patti.className = "patti green-patti";
+                score++;
+            } else {
+                btn.classList.add('red-patti');
+                patti.innerText = "गलत जवाब!";
+                patti.className = "patti red-patti";
+                if (navigator.vibrate) navigator.vibrate(300);
+            }
+            feedbackText.innerText = "Feedback: " + feedback;
+            answeredQuestions.add(currentIndex);
+
+            const btns = document.querySelectorAll('#options-box button');
+            btns.forEach(b => b.disabled = true);
+        }
+
+        function nextQuestion() {
+            const limit = quizData[currentSubject].length > 20 ? 19 : quizData[currentSubject].length - 1;
+            if (currentIndex < limit) {
+                currentIndex++;
+                showQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showQuestion();
+            }
+        }
+
+        function showFinalResult() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            const totalInSet = quizData[currentSubject].length > 20 ? 20 : quizData[currentSubject].length;
+            let percentage = (score / totalInSet) * 100;
+            let msg = "";
+            let color = "";
+
+            if (percentage >= 80) {
+                msg = "बहुत अच्छा 🤗";
+                color = "green";
+            } else if (percentage <= 70) {
+                msg = "बहुत बेकार";
+                color = "red";
+            } else {
+                msg = "थोड़ी और मेहनत करें";
+                color = "orange";
+            }
+
+            document.getElementById('final-message').innerText = msg;
+            document.getElementById('final-message').style.color = color;
+            document.getElementById('score-text').innerText = `आपका स्कोर: ${score} / ${totalInSet} (${Math.round(percentage)}%)`;
+        }
+    </script>
+</body>
+</html>
