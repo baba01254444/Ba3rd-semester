@@ -10,201 +10,207 @@
             --secondary: #a777e3;
             --success: #2ecc71;
             --danger: #e74c3c;
+            --dark: #2c3e50;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #f0f2f5;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            margin: 0; padding: 20px;
         }
 
         .quiz-card {
             background: white;
-            padding: 30px;
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             text-align: center;
         }
 
-        h1 { color: #333; font-size: 24px; }
-        .subject-tag { color: var(--primary); font-weight: bold; margin-bottom: 10px; display: block; }
-
-        /* Stylish Buttons */
-        .btn {
+        .btn-stylish {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            color: white;
-            padding: 15px 25px;
-            margin: 10px 0;
-            width: 100%;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: block;
+            border: none; color: white; padding: 15px; margin: 8px 0;
+            width: 100%; border-radius: 12px; font-size: 16px;
+            font-weight: 600; cursor: pointer; transition: 0.3s;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
-        }
-
-        /* Patti Styles */
         .patti {
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-weight: bold;
-            display: none;
-            animation: slideIn 0.3s ease;
+            padding: 15px; border-radius: 10px; margin: 15px 0;
+            font-weight: bold; display: none; color: white;
         }
+        .green-patti { background: var(--success); display: block; }
+        .red-patti { background: var(--danger); display: block; }
 
-        .green-patti { background-color: var(--success); color: white; display: block; }
-        .red-patti { background-color: var(--danger); color: white; display: block; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+        .nav-btn { background: var(--dark); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; flex: 1; }
 
-        #feedback-text {
-            margin-top: 15px;
-            font-style: italic;
-            color: #555;
-        }
-
-        footer {
-            margin-top: auto;
-            padding: 20px;
-            font-weight: bold;
-            color: #444;
-            letter-spacing: 1px;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
+        .result-screen { font-size: 22px; font-weight: bold; padding: 20px; }
         .hidden { display: none; }
+        footer { margin-top: auto; padding: 20px; font-weight: bold; color: #444; }
     </style>
 </head>
 <body>
 
     <div class="quiz-card">
-        <h1>Online Mock Test</h1>
+        <h1 id="title">Online Mock Test</h1>
         
         <div id="menu">
-            <p>Apna Subject Chune:</p>
-            <button class="btn" onclick="loadQuestion('hindi')">BA - Hindi</button>
-            <button class="btn" onclick="loadQuestion('english')">BA - English</button>
-            <button class="btn" onclick="loadQuestion('sociology')">BA - Sociology</button>
-            <button class="btn" style="background: #34495e;" onclick="loadQuestion('fitter')">ITI - Fitter Trade</button>
+            <p>Subject Select Karein (20 MCQ Set):</p>
+            <button class="btn-stylish" onclick="startQuiz('hindi')">BA 4th Sem - Hindi</button>
+            <button class="btn-stylish" onclick="startQuiz('sociology')">BA - Sociology</button>
+            <button class="btn-stylish" onclick="startQuiz('fitter')">ITI - Fitter</button>
         </div>
 
         <div id="quiz-screen" class="hidden">
-            <span id="subject-name" class="subject-tag"></span>
-            <h3 id="question">Sawal yahan aayega?</h3>
-            <div id="options">
-                </div>
+            <div style="display:flex; justify-content: space-between; color: var(--primary); font-weight:bold; margin-bottom:10px;">
+                <span id="subject-label"></span>
+                <span id="q-counter"></span>
+            </div>
+            <h3 id="question-text"></h3>
+            <div id="options-box"></div>
+            
             <div id="patti-box" class="patti"></div>
-            <p id="feedback-text"></p>
-            <button class="btn" style="background: #95a5a6; margin-top: 20px;" onclick="resetQuiz()">Back to Menu</button>
+            <p id="instant-feedback" style="font-weight:bold;"></p>
+
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="prevQuestion()">Previous</button>
+                <button class="nav-btn" onclick="nextQuestion()">Next</button>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <div class="result-screen" id="final-message"></div>
+            <p id="score-text"></p>
+            <button class="btn-stylish" onclick="location.reload()">Re-test / Home</button>
         </div>
     </div>
 
     <footer>Developed By "Rohit Yadav"</footer>
 
     <script>
+        let currentSubject = "";
+        let currentIndex = 0;
+        let score = 0;
+        let answeredQuestions = new Set();
+
         const quizData = {
-            hindi: {
-                sub: "BA 3rd Sem - Hindi",
-                q: "आधुनिक हिंदी साहित्य का जनक किसे माना जाता है?",
-                options: ["तुलसीदास", "भारतेंदु हरिश्चंद्र", "प्रेमचंद", "कबीरदास"],
-                correct: 1,
-                feedback: "Bharatendu Harishchandra ne modern Hindi literature ki neev rakhi thi."
-            },
-            english: {
-                sub: "BA 3rd Sem - English",
-                q: "Who wrote the play 'Macbeth'?",
-                options: ["John Milton", "William Wordsworth", "William Shakespeare", "PB Shelley"],
-                correct: 2,
-                feedback: "Shakespeare is famous for his tragedies like Macbeth and Hamlet."
-            },
-            sociology: {
-                sub: "BA 3rd Sem - Sociology",
-                q: "समाजशास्त्र का जनक (Father of Sociology) किसे कहा जाता है?",
-                options: ["अगस्त कॉम्टे", "कार्ल मार्क्स", "मैक्स वेबर", "अरस्तू"],
-                correct: 0,
-                feedback: "Auguste Comte ne 1838 mein 'Sociology' shabd ka prayog kiya tha."
-            },
-            fitter: {
-                sub: "ITI - Fitter (Chapter 1)",
-                q: "Bench Vice की बॉडी किस मटेरियल की बनी होती है?",
-                options: ["Mild Steel", "Cast Iron", "High Carbon Steel", "Aluminium"],
-                correct: 1,
-                feedback: "Bench Vice ki body aksar Grey Cast Iron se bani hoti hai."
-            }
+            hindi: [
+                { q: "अनुवाद की प्रक्रिया में 'Source Language' को क्या कहते हैं?", options: ["लक्ष्य भाषा", "स्रोत भाषा", "मातृ भाषा", "विदेशी भाषा"], correct: 1, feedback: "स्रोत भाषा (Source Language) वह है जिससे अनुवाद किया जाता है।" },
+                { q: "अधिसूचना (Notification) कहाँ प्रकाशित होती है?", options: ["समाचार पत्र में", "सरकारी गजट में", "दीवार पर", "मैगजीन में"], correct: 1, feedback: "अधिसूचना हमेशा सरकारी गजट में प्रकाशित होती है।" },
+                // ... Yahan aap 20 questions tak list badha sakte hain
+            ],
+            sociology: [
+                { q: "समाजशास्त्र का जनक किसे माना जाता है?", options: ["अगस्त कॉम्टे", "कार्ल मार्क्स", "मैक्स वेबर", "अरस्तू"], correct: 0, feedback: "Auguste Comte ne 1838 mein Sociology shabd ka prayog kiya." }
+            ],
+            fitter: [
+                { q: "बेंच वाइस की बॉडी किस धातु की बनी होती है?", options: ["माइल्ड स्टील", "कास्ट आयरन", "एल्युमिनियम", "कॉपर"], correct: 1, feedback: "कास्ट आयरन झटकों को सहन कर सकता है।" }
+            ]
         };
 
-        function loadQuestion(subject) {
-            const data = quizData[subject];
+        // Extra dummy questions to make it 20 (Aap inki jagah apne sawal daal dein)
+        for(let i=0; i<18; i++){
+            quizData.hindi.push({ q: `Hindi MCQ Question Number ${i+3}?`, options: ["Option A", "Option B", "Option C", "Option D"], correct: 0, feedback: "Yeh ek sample feedback hai." });
+        }
+
+        function startQuiz(sub) {
+            currentSubject = sub;
+            currentIndex = 0;
+            score = 0;
+            answeredQuestions.clear();
             document.getElementById('menu').classList.add('hidden');
             document.getElementById('quiz-screen').classList.remove('hidden');
-            
-            document.getElementById('subject-name').innerText = data.sub;
-            document.getElementById('question').innerText = data.q;
-            
-            const optionsDiv = document.getElementById('options');
-            optionsDiv.innerHTML = '';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const data = quizData[currentSubject][currentIndex];
+            document.getElementById('subject-label').innerText = currentSubject.toUpperCase();
+            document.getElementById('q-counter').innerText = `Q: ${currentIndex + 1}/20`;
+            document.getElementById('question-text').innerText = data.q;
+            document.getElementById('patti-box').className = "patti";
+            document.getElementById('instant-feedback').innerText = "";
+
+            const optionsBox = document.getElementById('options-box');
+            optionsBox.innerHTML = '';
             
             data.options.forEach((opt, index) => {
-                const button = document.createElement('button');
-                button.className = 'btn';
-                button.style.background = '#fff';
-                button.style.color = '#333';
-                button.style.border = '2px solid #ddd';
-                button.innerText = opt;
-                button.onclick = () => checkAnswer(index, data.correct, data.feedback, button);
-                optionsDiv.appendChild(button);
+                const btn = document.createElement('button');
+                btn.className = 'btn-stylish';
+                btn.style.background = 'white'; btn.style.color = '#333'; btn.style.border = '1px solid #ddd';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index, data.correct, data.feedback, btn);
+                optionsBox.appendChild(btn);
             });
         }
 
-        function checkAnswer(selected, correct, feedback, btnElement) {
-            const patti = document.getElementById('patti-box');
-            const feedbackPara = document.getElementById('feedback-text');
-            
-            // Disable all buttons after click
-            const allBtns = document.querySelectorAll('#options .btn');
-            allBtns.forEach(b => b.disabled = true);
+        function checkAnswer(selected, correct, feedback, btn) {
+            if (answeredQuestions.has(currentIndex)) return;
 
+            const patti = document.getElementById('patti-box');
+            const feedbackText = document.getElementById('instant-feedback');
+            
             if (selected === correct) {
-                // Right Answer
-                btnElement.classList.add('green-patti');
-                patti.innerText = "Sahi Utar!";
+                btn.classList.add('green-patti');
+                patti.innerText = "सहीं जवाब!";
                 patti.className = "patti green-patti";
+                score++;
             } else {
-                // Wrong Answer
-                btnElement.classList.add('red-patti');
-                patti.innerText = "Galat Utar!";
+                btn.classList.add('red-patti');
+                patti.innerText = "गलत जवाब!";
                 patti.className = "patti red-patti";
-                
-                // Vibration 300ms
-                if (navigator.vibrate) {
-                    navigator.vibrate(300);
-                }
+                if (navigator.vibrate) navigator.vibrate(300);
             }
-            feedbackPara.innerText = "Feedback: " + feedback;
+            feedbackText.innerText = "विवरण: " + feedback;
+            answeredQuestions.add(currentIndex);
+
+            const btns = document.querySelectorAll('#options-box button');
+            btns.forEach(b => b.disabled = true);
         }
 
-        function resetQuiz() {
-            document.getElementById('menu').classList.remove('hidden');
+        function nextQuestion() {
+            if (currentIndex < 19) { // 20 sawal limit
+                currentIndex++;
+                showQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showQuestion();
+            }
+        }
+
+        function showFinalResult() {
             document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('patti-box').className = "patti";
-            document.getElementById('feedback-text').innerText = "";
+            document.getElementById('result-screen').classList.remove('hidden');
+            
+            let percentage = (score / 20) * 100;
+            let msg = "";
+            let color = "";
+
+            if (percentage >= 80) {
+                msg = "बहुत अच्छा 🤗";
+                color = "green";
+            } else if (percentage <= 70) {
+                msg = "बहुत बेकार";
+                color = "red";
+            } else {
+                msg = "थोड़ी और मेहनत करें";
+                color = "orange";
+            }
+
+            document.getElementById('final-message').innerText = msg;
+            document.getElementById('final-message').style.color = color;
+            document.getElementById('score-text').innerText = `आपका स्कोर: ${score} / 20 (${percentage}%)`;
         }
     </script>
 </body>
